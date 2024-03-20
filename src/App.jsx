@@ -41,17 +41,31 @@ function Rectangle({
           });
         }}
       >
-        <Text y={-20} text={`模块${index + 1}`} onClick={onSelect} />
+        <Rect
+          x={0}
+          y={-24}
+          width={40}
+          height={20}
+          fill="#ddd"
+          stroke="#555"
+          strokeWidth={1}
+        />
+        <Text x={4} y={-20} text={`模块${index + 1}`} onClick={onSelect} />
         {isSelected && (
           <>
-            <Text
-              x={50}
-              y={-20}
-              text={`(${state.x},${state.y}) ${state.width}x${state.height}`}
+            <Text x={50} y={-20} text={`${state.width} x ${state.height} px`} />
+            <Rect
+              x={0}
+              y={state.height + 4}
+              width={34}
+              height={20}
+              fill="#ddd"
+              stroke="#555"
+              strokeWidth={1}
             />
             <Text
-              x={0}
-              y={state.height + 10}
+              x={4}
+              y={state.height + 8}
               text={edit ? "确认" : "编辑"}
               onClick={() => {
                 if (edit) onSubmit();
@@ -67,7 +81,7 @@ function Rectangle({
           y={0}
           width={state.width}
           height={state.height}
-          stroke="green"
+          stroke="#0098df"
           onClick={onSelect}
           onTransformEnd={() => {
             // transformer is changing scale of the node
@@ -120,12 +134,22 @@ function Main() {
       height: 100,
     },
   ]);
+  const [selection, setSelection] = useState({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    visible: false,
+  });
+  const isSelecting = useRef(false);
+  const selectionX1 = useRef(0);
+  const selectionY1 = useRef(0);
   const [selectedId, setSelectedId] = useState(null);
   const [tempRect, setTempRect] = useState(null);
 
   const selectRect = (item) => {
     if (selectedId !== item.id && tempRect) {
-      console.log("restore", selectedId, tempRect);
+      // console.log("restore", selectedId, tempRect);
       const index = rects.findIndex((x) => x.id === selectedId);
       rects[index] = tempRect;
       setTempRect(null);
@@ -148,7 +172,7 @@ function Main() {
   };
 
   const onChange = (index, data) => {
-    console.log("onchange", index, data);
+    // console.log("onchange", index, data);
     rects[index] = data;
     setRects([...rects]);
   };
@@ -159,8 +183,55 @@ function Main() {
       <button onClick={addCanvas}>Add Item</button>
       <h2>Canvas</h2>
       <div style={{ border: "1px solid #eee" }}>
-        <Stage width={window.innerWidth} height={window.innerHeight}>
+        <Stage
+          width={window.innerWidth}
+          height={window.innerHeight}
+          onMouseDown={(e) => {
+            const stage = e.target.getStage();
+            if (e.target != stage) return;
+            e.evt.preventDefault();
+            selectionX1.current = stage.getPointerPosition().x;
+            selectionY1.current = stage.getPointerPosition().y;
+            setSelection({ ...selection, width: 0, height: 0 });
+            isSelecting.current = true;
+          }}
+          onMouseMove={(e) => {
+            if (!isSelecting.current) return;
+            e.evt.preventDefault();
+            const stage = e.target.getStage();
+            const x2 = stage.getPointerPosition().x;
+            const y2 = stage.getPointerPosition().y;
+            setSelection({
+              visible: true,
+              x: Math.min(selectionX1.current, x2),
+              y: Math.min(selectionY1.current, y2),
+              width: Math.abs(x2 - selectionX1.current),
+              height: Math.abs(y2 - selectionY1.current),
+            });
+          }}
+          onMouseUp={(e) => {
+            isSelecting.current = false;
+            if (!selection.visible) return;
+            e.evt.preventDefault();
+            setSelection({
+              ...selection,
+              visible: false,
+            });
+            console.log('create', selection);
+            setRects((prev) => [
+              ...prev,
+              {
+                id: Date.now(),
+                x: Math.floor(selection.x),
+                y: Math.floor(selection.y),
+                width: Math.floor(selection.width),
+                height: Math.floor(selection.height),
+              },
+            ]);
+          }}
+        >
           <Layer>
+            <Rect {...selection} fill="rgba(0,0,255,0.5)" />
             {rects.map((rect, index) => (
               <Rectangle
                 key={rect.id}
