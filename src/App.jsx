@@ -1,5 +1,14 @@
 import { useState, useRef, useEffect } from "react";
-import { Stage, Layer, Group, Text, Transformer, Rect } from "react-konva";
+import {
+  Stage,
+  Layer,
+  Group,
+  Text,
+  Transformer,
+  Rect,
+  Image,
+} from "react-konva";
+import useImage from "use-image";
 
 function Rectangle({
   state,
@@ -41,18 +50,11 @@ function Rectangle({
           });
         }}
       >
-        <Rect
-          x={0}
-          y={-24}
-          width={40}
-          height={20}
-          fill="#ddd"
-          stroke="#555"
-          strokeWidth={1}
-        />
+        <Rect x={0} y={-24} width={40} height={20} fill="#ddd" />
         <Text x={4} y={-20} text={`模块${index + 1}`} onClick={onSelect} />
         {isSelected && (
           <>
+            <Rect x={46} y={-24} width={80} height={20} fill="#ddd" />
             <Text x={50} y={-20} text={`${state.width} x ${state.height} px`} />
             <Rect
               x={0}
@@ -60,8 +62,6 @@ function Rectangle({
               width={34}
               height={20}
               fill="#ddd"
-              stroke="#555"
-              strokeWidth={1}
             />
             <Text
               x={4}
@@ -146,6 +146,7 @@ function Main() {
   const selectionY1 = useRef(0);
   const [selectedId, setSelectedId] = useState(null);
   const [tempRect, setTempRect] = useState(null);
+  const [image] = useImage("/bg.png");
 
   const selectRect = (item) => {
     if (selectedId !== item.id && tempRect) {
@@ -183,54 +184,54 @@ function Main() {
       <button onClick={addCanvas}>Add Item</button>
       <h2>Canvas</h2>
       <div style={{ border: "1px solid #eee" }}>
-        <Stage
-          width={window.innerWidth}
-          height={window.innerHeight}
-          onMouseDown={(e) => {
-            const stage = e.target.getStage();
-            if (e.target != stage) return;
-            e.evt.preventDefault();
-            selectionX1.current = stage.getPointerPosition().x;
-            selectionY1.current = stage.getPointerPosition().y;
-            setSelection({ ...selection, width: 0, height: 0 });
-            isSelecting.current = true;
-          }}
-          onMouseMove={(e) => {
-            if (!isSelecting.current) return;
-            e.evt.preventDefault();
-            const stage = e.target.getStage();
-            const x2 = stage.getPointerPosition().x;
-            const y2 = stage.getPointerPosition().y;
-            setSelection({
-              visible: true,
-              x: Math.min(selectionX1.current, x2),
-              y: Math.min(selectionY1.current, y2),
-              width: Math.abs(x2 - selectionX1.current),
-              height: Math.abs(y2 - selectionY1.current),
-            });
-          }}
-          onMouseUp={(e) => {
-            isSelecting.current = false;
-            if (!selection.visible) return;
-            e.evt.preventDefault();
-            setSelection({
-              ...selection,
-              visible: false,
-            });
-            console.log('create', selection);
-            setRects((prev) => [
-              ...prev,
-              {
-                id: Date.now(),
-                x: Math.floor(selection.x),
-                y: Math.floor(selection.y),
-                width: Math.floor(selection.width),
-                height: Math.floor(selection.height),
-              },
-            ]);
-          }}
-        >
+        <Stage width={window.innerWidth} height={window.innerHeight}>
           <Layer>
+            <Image
+              image={image}
+              onMouseDown={(e) => {
+                const stage = e.target.getStage();
+                // if (e.target != stage) return;
+                e.evt.preventDefault();
+                selectionX1.current = stage.getPointerPosition().x;
+                selectionY1.current = stage.getPointerPosition().y;
+                setSelection({ ...selection, width: 0, height: 0 });
+                isSelecting.current = true;
+              }}
+              onMouseMove={(e) => {
+                if (!isSelecting.current) return;
+                e.evt.preventDefault();
+                const stage = e.target.getStage();
+                const x2 = stage.getPointerPosition().x;
+                const y2 = stage.getPointerPosition().y;
+                setSelection({
+                  visible: true,
+                  x: Math.min(selectionX1.current, x2),
+                  y: Math.min(selectionY1.current, y2),
+                  width: Math.abs(x2 - selectionX1.current),
+                  height: Math.abs(y2 - selectionY1.current),
+                });
+              }}
+              onMouseUp={(e) => {
+                isSelecting.current = false;
+                if (!selection.visible) return;
+                e.evt.preventDefault();
+                setSelection({
+                  ...selection,
+                  visible: false,
+                });
+                console.log("create", selection);
+                setRects((prev) => [
+                  ...prev,
+                  {
+                    id: Date.now(),
+                    x: Math.floor(selection.x),
+                    y: Math.floor(selection.y),
+                    width: Math.floor(selection.width),
+                    height: Math.floor(selection.height),
+                  },
+                ]);
+              }}
+            />
             <Rect {...selection} fill="rgba(0,0,255,0.5)" />
             {rects.map((rect, index) => (
               <Rectangle

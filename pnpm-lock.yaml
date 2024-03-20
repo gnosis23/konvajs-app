@@ -12,6 +12,7 @@ specifiers:
   react: ^18.2.0
   react-dom: ^18.2.0
   react-konva: ^18.2.10
+  use-image: ^1.1.1
   vite: ^5.1.6
 
 dependencies:
@@ -19,6 +20,7 @@ dependencies:
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   react-konva: 18.2.10_gwjzuoa7z3n5ficapu2jbsv7se
+  use-image: 1.1.1_biqbaboplfbrettd7655fr4n2y
 
 devDependencies:
   '@types/react': 18.2.66
@@ -2478,6 +2480,16 @@ packages:
     dependencies:
       punycode: 2.3.1
     dev: true
+
+  /use-image/1.1.1_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-n4YO2k8AJG/BcDtxmBx8Aa+47kxY5m335dJiCQA5tTeVU4XdhrhqR6wT0WISRXwdMEOv5CSjqekDZkEMiiWaYQ==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    dev: false
 
   /vite/5.1.6:
     resolution: {integrity: sha512-yYIAZs9nVfRJ/AiOLCA91zzhjsHUgMjB+EigzFb6W2XTLO8JixBCKCjvhKZaye+NKYHCrkv3Oh50dH9EdLU2RA==}
